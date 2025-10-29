@@ -5,7 +5,7 @@ const BarometreSecurite = () => {
     { name: "Amine Ammar", password: "amine2025" },
     { name: "Aziz Bourkia", password: "aziz2025" },
     { name: "Fouad Hedadi", password: "fouad2025" },
-    { name: "Anass Kraifa", password: "anass2025" },
+    { name: "Anas Krayfa", password: "anas2025" },
     { name: "Rachid Kasso", password: "rachid2025" },
     { name: "Adaoud Mehdi", password: "mehdi2025" },
     { name: "Adame Nibba", password: "adame2025" }
@@ -181,10 +181,11 @@ const BarometreSecurite = () => {
   const getLevel = (score) => {
     if (score < 0) return { label: 'Zone Dangereuse', color: 'bg-red-600', icon: '🔴', textColor: 'text-red-600' };
     if (score === 0) return { label: 'Neutre', color: 'bg-gray-400', icon: '⚪', textColor: 'text-gray-600' };
-    if (score <= 15) return { label: 'Acceptable', color: 'bg-yellow-500', icon: '🟡', textColor: 'text-yellow-600' };
-    if (score <= 30) return { label: 'Bon', color: 'bg-green-500', icon: '🟢', textColor: 'text-green-600' };
-    if (score <= 45) return { label: 'Très Bon', color: 'bg-blue-500', icon: '🔵', textColor: 'text-blue-600' };
-    if (score < 50) return { label: 'Excellent', color: 'bg-purple-500', icon: '🟣', textColor: 'text-purple-600' };
+    if (score <= 20) return { label: 'À Surveiller', color: 'bg-orange-500', icon: '🟠', textColor: 'text-orange-600' };
+    if (score <= 40) return { label: 'Acceptable', color: 'bg-yellow-500', icon: '🟡', textColor: 'text-yellow-600' };
+    if (score <= 60) return { label: 'Bon', color: 'bg-green-500', icon: '🟢', textColor: 'text-green-600' };
+    if (score <= 80) return { label: 'Très Bon', color: 'bg-blue-500', icon: '🔵', textColor: 'text-blue-600' };
+    if (score < 100) return { label: 'Excellent', color: 'bg-purple-500', icon: '🟣', textColor: 'text-purple-600' };
     return { label: 'CHAMPION', color: 'bg-gradient-to-r from-yellow-400 to-yellow-600', icon: '🏆', textColor: 'text-yellow-600' };
   };
 
@@ -194,7 +195,7 @@ const BarometreSecurite = () => {
     const score = workerScores[workerName] || 0;
 
     // Badge Champion 100
-    if (score >= 50) badges.push({ icon: '🏆', name: 'Champion 100', color: 'bg-yellow-400' });
+    if (score >= 100) badges.push({ icon: '🏆', name: 'Champion 100', color: 'bg-yellow-400' });
 
     // Badge Protecteur (3+ actions majeures 4-5 points)
     const majorActions = workerEvents.filter(e => e.points >= 4).length;
@@ -262,7 +263,17 @@ const BarometreSecurite = () => {
   };
 
   const getTop3 = () => getSortedWorkers().slice(0, 3);
-  const getTop10Dangerous = () => getSortedWorkers().slice().reverse().slice(0, 10);
+  const getTop10Dangerous = () => {
+    return getSortedWorkers()
+      .filter(worker => {
+        const workerEvents = events.filter(e => e.worker === worker.name);
+        const hasNegativeEvent = workerEvents.some(e => e.points < 0);
+        return worker.score < 0 || hasNegativeEvent;
+      })
+      .slice()
+      .reverse()
+      .slice(0, 10);
+  };
   
   const getFilteredWorkers = () => {
     const sorted = getSortedWorkers();
