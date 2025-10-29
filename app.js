@@ -5,7 +5,7 @@ const ToolboxTracker = () => {
     { name: "Amine Ammar", password: "amine2025" },
     { name: "Aziz Bourkia", password: "aziz2025" },
     { name: "Fouad Hedadi", password: "fouad2025" },
-    { name: "Anas Krayfa", password: "anas2025" },
+    { name: "Anass Kraifa", password: "anass2025" },
     { name: "Rachid Kasso", password: "rachid2025" },
     { name: "Adaoud Mehdi", password: "mehdi2025" },
     { name: "Adame Nibba", password: "adame2025" }
