@@ -75,6 +75,7 @@ const BarometreSecurite = () => {
   const [selectedAction, setSelectedAction] = useState(null);
   const [eventDescription, setEventDescription] = useState('');
   const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
+  const [viewingWorker, setViewingWorker] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -135,6 +136,7 @@ const BarometreSecurite = () => {
     setCurrentUser(null);
     setLoginName('');
     setLoginPassword('');
+    setViewingWorker(null);
   };
 
   const handleAddEvent = () => {
@@ -177,13 +179,81 @@ const BarometreSecurite = () => {
   };
 
   const getLevel = (score) => {
-    if (score < 0) return { label: 'Zone Dangereuse', color: 'bg-red-600', icon: '🔴' };
-    if (score <= 20) return { label: 'À Surveiller', color: 'bg-orange-500', icon: '🟠' };
-    if (score <= 40) return { label: 'Acceptable', color: 'bg-yellow-500', icon: '🟡' };
-    if (score <= 60) return { label: 'Bon', color: 'bg-green-500', icon: '🟢' };
-    if (score <= 80) return { label: 'Très Bon', color: 'bg-blue-500', icon: '🔵' };
-    if (score < 100) return { label: 'Excellent', color: 'bg-purple-500', icon: '🟣' };
-    return { label: 'CHAMPION', color: 'bg-gradient-to-r from-yellow-400 to-yellow-600', icon: '🏆' };
+    if (score < 0) return { label: 'Zone Dangereuse', color: 'bg-red-600', icon: '🔴', textColor: 'text-red-600' };
+    if (score === 0) return { label: 'Neutre', color: 'bg-gray-400', icon: '⚪', textColor: 'text-gray-600' };
+    if (score <= 20) return { label: 'À Surveiller', color: 'bg-orange-500', icon: '🟠', textColor: 'text-orange-600' };
+    if (score <= 40) return { label: 'Acceptable', color: 'bg-yellow-500', icon: '🟡', textColor: 'text-yellow-600' };
+    if (score <= 60) return { label: 'Bon', color: 'bg-green-500', icon: '🟢', textColor: 'text-green-600' };
+    if (score <= 80) return { label: 'Très Bon', color: 'bg-blue-500', icon: '🔵', textColor: 'text-blue-600' };
+    if (score < 100) return { label: 'Excellent', color: 'bg-purple-500', icon: '🟣', textColor: 'text-purple-600' };
+    return { label: 'CHAMPION', color: 'bg-gradient-to-r from-yellow-400 to-yellow-600', icon: '🏆', textColor: 'text-yellow-600' };
+  };
+
+  const getBadges = (workerName) => {
+    const workerEvents = events.filter(e => e.worker === workerName);
+    const badges = [];
+    const score = workerScores[workerName] || 0;
+
+    // Badge Champion 100
+    if (score >= 100) badges.push({ icon: '🏆', name: 'Champion 100', color: 'bg-yellow-400' });
+
+    // Badge Protecteur (3+ actions majeures 4-5 points)
+    const majorActions = workerEvents.filter(e => e.points >= 4).length;
+    if (majorActions >= 3) badges.push({ icon: '🛡️', name: 'Protecteur', color: 'bg-blue-400' });
+
+    // Badge Expert Sécurité (10+ événements positifs)
+    const positiveEvents = workerEvents.filter(e => e.points > 0).length;
+    if (positiveEvents >= 10) badges.push({ icon: '💎', name: 'Expert Sécurité', color: 'bg-purple-400' });
+
+    // Badge Semaine Parfaite (+5 ou plus en 7 jours)
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const weekEvents = workerEvents.filter(e => new Date(e.date) >= weekAgo);
+    const weekScore = weekEvents.reduce((sum, e) => sum + e.points, 0);
+    if (weekScore >= 5) badges.push({ icon: '🎖️', name: 'Semaine Parfaite', color: 'bg-green-400' });
+
+    // Badge Mois d'Or (+15 ou plus en 30 jours)
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const monthEvents = workerEvents.filter(e => new Date(e.date) >= monthAgo);
+    const monthScore = monthEvents.reduce((sum, e) => sum + e.points, 0);
+    if (monthScore >= 15) badges.push({ icon: '🏅', name: 'Mois d\'Or', color: 'bg-yellow-500' });
+
+    // Badge Série de 5 (5 actions positives consécutives)
+    let consecutive = 0;
+    for (let i = 0; i < workerEvents.length; i++) {
+      if (workerEvents[i].points > 0) {
+        consecutive++;
+        if (consecutive >= 5) {
+          badges.push({ icon: '🔥', name: 'Série de 5', color: 'bg-red-400' });
+          break;
+        }
+      } else {
+        consecutive = 0;
+      }
+    }
+
+    return badges;
+  };
+
+  const getScoreHistory = (workerName, days = 30) => {
+    const workerEvents = events.filter(e => e.worker === workerName).reverse();
+    const history = [];
+    let currentScore = 0;
+    
+    const now = new Date();
+    const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    
+    for (let i = 0; i <= days; i++) {
+      const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const dayEvents = workerEvents.filter(e => e.date.split('T')[0] === dateStr);
+      dayEvents.forEach(e => currentScore += e.points);
+      
+      history.push({ date: dateStr, score: currentScore });
+    }
+    
+    return history;
   };
 
   const getSortedWorkers = () => {
@@ -201,17 +271,20 @@ const BarometreSecurite = () => {
     return sorted.filter(w => w.name.toLowerCase().includes(searchTerm.toLowerCase()));
   };
 
-  const getWorkerEvents = (workerName) => {
-    return events.filter(e => e.worker === workerName).slice(0, 5);
+  const getWorkerEvents = (workerName, limit = null) => {
+    const filtered = events.filter(e => e.worker === workerName);
+    return limit ? filtered.slice(0, limit) : filtered;
   };
 
   const downloadCSV = () => {
     const sorted = getSortedWorkers();
     let csv = "BAROMÈTRE DE SÉCURITÉ - EUROHINCA MAROC\n\n";
-    csv += "Nom du travailleur,Score,Niveau\n";
+    csv += "Nom du travailleur,Score,Niveau,Badges\n";
     sorted.forEach(worker => {
       const level = getLevel(worker.score);
-      csv += `${worker.name},${worker.score},${level.label}\n`;
+      const badges = getBadges(worker.name);
+      const badgeNames = badges.map(b => b.name).join('; ');
+      csv += `${worker.name},${worker.score},${level.label},"${badgeNames}"\n`;
     });
     
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -275,6 +348,129 @@ const BarometreSecurite = () => {
             className: "w-full text-white py-3 rounded-lg transition-colors font-bold text-lg",
             style: {backgroundColor: COMPANY_COLOR}
           }, "Se connecter")
+        )
+      )
+    );
+  }
+
+  // Worker Profile View
+  if (viewingWorker) {
+    const score = workerScores[viewingWorker] || 0;
+    const level = getLevel(score);
+    const badges = getBadges(viewingWorker);
+    const workerEvents = getWorkerEvents(viewingWorker);
+    const scoreHistory = getScoreHistory(viewingWorker, 30);
+    const positiveCount = workerEvents.filter(e => e.points > 0).length;
+    const negativeCount = workerEvents.filter(e => e.points < 0).length;
+
+    const maxScore = Math.max(...scoreHistory.map(h => h.score), 10);
+    const minScore = Math.min(...scoreHistory.map(h => h.score), 0);
+
+    return React.createElement('div', {className: "min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6"},
+      React.createElement('div', {className: "max-w-6xl mx-auto"},
+        React.createElement('button', {
+          onClick: () => setViewingWorker(null),
+          className: "mb-4 flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow hover:shadow-lg transition-shadow font-semibold",
+          style: {color: COMPANY_COLOR}
+        }, "← Retour à la liste"),
+
+        React.createElement('div', {className: "bg-white rounded-lg shadow-xl p-8"},
+          React.createElement('div', {className: "flex items-start justify-between mb-8"},
+            React.createElement('div', null,
+              React.createElement('h1', {className: "text-3xl font-bold text-gray-800 mb-2"}, viewingWorker),
+              React.createElement('div', {className: "flex items-center gap-3"},
+                React.createElement('span', {className: "text-2xl"}, level.icon),
+                React.createElement('span', {className: `font-bold ${level.textColor}`}, level.label)
+              )
+            ),
+            React.createElement('div', {className: "text-center"},
+              React.createElement('div', {className: `${level.color} text-white px-8 py-4 rounded-lg`},
+                React.createElement('div', {className: "text-5xl font-bold"}, score),
+                React.createElement('div', {className: "text-sm"}, "SCORE TOTAL")
+              )
+            )
+          ),
+
+          badges.length > 0 && React.createElement('div', {className: "mb-8"},
+            React.createElement('h3', {className: "text-xl font-bold text-gray-800 mb-4"}, "🏆 Badges obtenus"),
+            React.createElement('div', {className: "flex flex-wrap gap-3"},
+              badges.map((badge, idx) =>
+                React.createElement('div', {
+                  key: idx,
+                  className: `${badge.color} text-white px-4 py-2 rounded-full flex items-center gap-2 font-semibold`
+                },
+                  React.createElement('span', null, badge.icon),
+                  React.createElement('span', null, badge.name)
+                )
+              )
+            )
+          ),
+
+          React.createElement('div', {className: "grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"},
+            React.createElement('div', {className: "bg-green-50 border-2 border-green-200 rounded-lg p-4"},
+              React.createElement('div', {className: "text-3xl font-bold text-green-600"}, positiveCount),
+              React.createElement('div', {className: "text-sm text-gray-600"}, "Actions Positives")
+            ),
+            React.createElement('div', {className: "bg-red-50 border-2 border-red-200 rounded-lg p-4"},
+              React.createElement('div', {className: "text-3xl font-bold text-red-600"}, negativeCount),
+              React.createElement('div', {className: "text-sm text-gray-600"}, "Infractions")
+            ),
+            React.createElement('div', {className: "bg-blue-50 border-2 border-blue-200 rounded-lg p-4"},
+              React.createElement('div', {className: "text-3xl font-bold text-blue-600"}, workerEvents.length),
+              React.createElement('div', {className: "text-sm text-gray-600"}, "Événements Total")
+            )
+          ),
+
+          React.createElement('div', {className: "mb-8"},
+            React.createElement('h3', {className: "text-xl font-bold text-gray-800 mb-4"}, "📈 Évolution du Score (30 derniers jours)"),
+            React.createElement('div', {className: "bg-gray-50 p-4 rounded-lg", style: {height: '300px', position: 'relative'}},
+              React.createElement('svg', {viewBox: `0 0 ${scoreHistory.length * 20} 250`, style: {width: '100%', height: '100%'}},
+                React.createElement('line', {x1: 0, y1: 125, x2: scoreHistory.length * 20, y2: 125, stroke: '#ccc', strokeWidth: 1}),
+                React.createElement('polyline', {
+                  points: scoreHistory.map((h, i) => {
+                    const x = i * 20 + 10;
+                    const y = 250 - ((h.score - minScore) / (maxScore - minScore + 1)) * 200 - 25;
+                    return `${x},${y}`;
+                  }).join(' '),
+                  fill: 'none',
+                  stroke: COMPANY_COLOR,
+                  strokeWidth: 3
+                }),
+                scoreHistory.map((h, i) => {
+                  const x = i * 20 + 10;
+                  const y = 250 - ((h.score - minScore) / (maxScore - minScore + 1)) * 200 - 25;
+                  return React.createElement('circle', {key: i, cx: x, cy: y, r: 3, fill: COMPANY_COLOR});
+                })
+              )
+            )
+          ),
+
+          React.createElement('div', null,
+            React.createElement('h3', {className: "text-xl font-bold text-gray-800 mb-4"}, `📋 Historique Complet (${workerEvents.length} événements)`),
+            React.createElement('div', {className: "space-y-3", style: {maxHeight: '500px', overflowY: 'auto'}},
+              workerEvents.map(event =>
+                React.createElement('div', {
+                  key: event.id,
+                  className: `p-4 rounded-lg border-l-4 ${event.points > 0 ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`
+                },
+                  React.createElement('div', {className: "flex items-start justify-between"},
+                    React.createElement('div', {className: "flex-1"},
+                      React.createElement('div', {className: "flex items-center gap-3 mb-2"},
+                        React.createElement('span', {
+                          className: `${event.points > 0 ? 'bg-green-500' : 'bg-red-500'} text-white px-3 py-1 rounded-full font-bold`
+                        }, `${event.points > 0 ? '+' : ''}${event.points}`),
+                        React.createElement('span', {className: "font-bold text-gray-800"}, event.action),
+                        React.createElement('span', {className: "text-sm text-gray-500"}, new Date(event.date).toLocaleString('fr-FR'))
+                      ),
+                      React.createElement('p', {className: "text-gray-700"}, event.description),
+                      React.createElement('p', {className: "text-sm text-gray-500 mt-1"}, `Par: ${event.supervisor}`)
+                    )
+                  )
+                )
+              ),
+              workerEvents.length === 0 && React.createElement('p', {className: "text-center text-gray-500 py-8"}, "Aucun événement enregistré")
+            )
+          )
         )
       )
     );
@@ -362,17 +558,24 @@ const BarometreSecurite = () => {
               React.createElement('div', {className: "space-y-4"},
                 getTop3().map((worker, idx) => {
                   const level = getLevel(worker.score);
+                  const badges = getBadges(worker.name);
                   const medals = ['🥇', '🥈', '🥉'];
                   return React.createElement('div', {
                     key: worker.name,
-                    className: "flex items-center justify-between p-4 rounded-lg border-l-4",
-                    style: {borderColor: COMPANY_COLOR, backgroundColor: `${COMPANY_COLOR}10`}
+                    className: "flex items-center justify-between p-4 rounded-lg border-l-4 cursor-pointer hover:bg-blue-50 transition-colors",
+                    style: {borderColor: COMPANY_COLOR, backgroundColor: `${COMPANY_COLOR}10`},
+                    onClick: () => setViewingWorker(worker.name)
                   },
                     React.createElement('div', {className: "flex items-center gap-3"},
                       React.createElement('div', {className: "text-4xl"}, medals[idx]),
                       React.createElement('div', null,
                         React.createElement('p', {className: "font-bold text-lg"}, worker.name),
-                        React.createElement('p', {className: "text-sm text-gray-600"}, level.label)
+                        React.createElement('p', {className: "text-sm text-gray-600"}, level.label),
+                        badges.length > 0 && React.createElement('div', {className: "flex gap-1 mt-1"},
+                          badges.slice(0, 3).map((badge, i) => 
+                            React.createElement('span', {key: i, className: "text-lg"}, badge.icon)
+                          )
+                        )
                       )
                     ),
                     React.createElement('div', {className: `${level.color} text-white px-4 py-2 rounded-full font-bold text-xl`},
@@ -390,7 +593,8 @@ const BarometreSecurite = () => {
                   const level = getLevel(worker.score);
                   return React.createElement('div', {
                     key: worker.name,
-                    className: "flex items-center justify-between p-3 bg-white rounded-lg border-l-4 border-red-500"
+                    className: "flex items-center justify-between p-3 bg-white rounded-lg border-l-4 border-red-500 cursor-pointer hover:bg-gray-50 transition-colors",
+                    onClick: () => setViewingWorker(worker.name)
                   },
                     React.createElement('div', {className: "flex items-center gap-3"},
                       React.createElement('div', {className: "font-bold text-red-600"}, `#${idx + 1}`),
@@ -516,16 +720,19 @@ const BarometreSecurite = () => {
                   React.createElement('th', {className: "px-4 py-3 text-left"}, "Nom"),
                   React.createElement('th', {className: "px-4 py-3 text-center"}, "Score"),
                   React.createElement('th', {className: "px-4 py-3 text-left"}, "Niveau"),
+                  React.createElement('th', {className: "px-4 py-3 text-left"}, "Badges"),
                   React.createElement('th', {className: "px-4 py-3 text-left"}, "Derniers Événements")
                 )
               ),
               React.createElement('tbody', null,
                 getFilteredWorkers().map((worker, idx) => {
                   const level = getLevel(worker.score);
-                  const workerEvents = getWorkerEvents(worker.name);
+                  const badges = getBadges(worker.name);
+                  const workerEvents = getWorkerEvents(worker.name, 3);
                   return React.createElement('tr', {
                     key: worker.name,
-                    className: idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                    className: `${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50 cursor-pointer transition-colors`,
+                    onClick: () => setViewingWorker(worker.name)
                   },
                     React.createElement('td', {className: "px-4 py-3 border font-bold text-center"}, idx + 1),
                     React.createElement('td', {className: "px-4 py-3 border font-semibold"}, worker.name),
@@ -541,6 +748,13 @@ const BarometreSecurite = () => {
                       )
                     ),
                     React.createElement('td', {className: "px-4 py-3 border"},
+                      badges.length > 0 ? React.createElement('div', {className: "flex gap-1"},
+                        badges.slice(0, 4).map((badge, i) =>
+                          React.createElement('span', {key: i, className: "text-xl", title: badge.name}, badge.icon)
+                        )
+                      ) : React.createElement('span', {className: "text-gray-400 text-sm"}, "-")
+                    ),
+                    React.createElement('td', {className: "px-4 py-3 border"},
                       workerEvents.length > 0 ? React.createElement('div', {className: "space-y-1"},
                         workerEvents.map(event =>
                           React.createElement('div', {
@@ -550,7 +764,7 @@ const BarometreSecurite = () => {
                             React.createElement('span', {
                               className: `font-bold ${event.points > 0 ? 'text-green-600' : 'text-red-600'}`
                             }, `${event.points > 0 ? '+' : ''}${event.points}`),
-                            React.createElement('span', {className: "text-gray-600"}, ` - ${event.action} (${new Date(event.date).toLocaleDateString()})`)
+                            React.createElement('span', {className: "text-gray-600"}, ` - ${event.action}`)
                           )
                         )
                       ) : React.createElement('span', {className: "text-gray-400 text-sm"}, "Aucun événement")
