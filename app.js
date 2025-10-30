@@ -3,11 +3,9 @@ const { useState, useEffect } = React;
 const ToolboxTracker = () => {
   const SUPERVISORS = [
     { name: "Amine Ammar", password: "amine2025" },
-    { name: "Aziz Bourkia", password: "aziz2025" },
-    { name: "Fouad Hedadi", password: "fouad2025" },
     { name: "Anass Kraifa", password: "anass2025" },
-    { name: "Rachid Kasso", password: "rachid2025" },
-    { name: "Adaoud Mehdi", password: "mehdi2025" },
+    { name: "Halima", password: "halima2025" },
+    { name: "Karim Abahmane", password: "karim2025" },
     { name: "Adame Nibba", password: "adame2025" }
   ];
   
@@ -56,6 +54,7 @@ const ToolboxTracker = () => {
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
   const [supervisor, setSupervisor] = useState('');
   const [shift, setShift] = useState(SHIFTS[0]);
+  const [theme, setTheme] = useState('');
   const [workerInput, setWorkerInput] = useState('');
   const [selectedWorkers, setSelectedWorkers] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
@@ -139,10 +138,15 @@ const ToolboxTracker = () => {
       return;
     }
 
+    if (!theme.trim()) {
+      setStatusMessage({ text: 'Veuillez entrer le thème du Toolbox Talk', type: 'error' });
+      return;
+    }
+
     if (editingSession) {
       const updatedSessions = toolboxSessions.map(s => 
         s.id === editingSession.id 
-          ? { ...s, date: currentDate, shift, supervisor, workers: selectedWorkers, attendance: selectedWorkers.length }
+          ? { ...s, date: currentDate, shift, supervisor, theme: theme.trim(), workers: selectedWorkers, attendance: selectedWorkers.length }
           : s
       );
       setToolboxSessions(updatedSessions);
@@ -155,6 +159,7 @@ const ToolboxTracker = () => {
         date: currentDate,
         shift,
         supervisor,
+        theme: theme.trim(),
         workers: selectedWorkers,
         attendance: selectedWorkers.length,
         createdAt: new Date().toISOString()
@@ -167,6 +172,7 @@ const ToolboxTracker = () => {
     }
     
     setSelectedWorkers([]);
+    setTheme('');
     setTimeout(() => {
       setStatusMessage({ text: 'Prêt pour la saisie', type: 'success' });
     }, 2000);
@@ -185,6 +191,7 @@ const ToolboxTracker = () => {
     setCurrentDate(session.date);
     setShift(session.shift);
     setSupervisor(session.supervisor);
+    setTheme(session.theme || '');
     setSelectedWorkers([...session.workers]);
     setActiveTab('entry');
   };
@@ -192,6 +199,7 @@ const ToolboxTracker = () => {
   const cancelEdit = () => {
     setEditingSession(null);
     setSelectedWorkers([]);
+    setTheme('');
   };
 
   const getFilteredSessions = () => {
@@ -256,9 +264,9 @@ const ToolboxTracker = () => {
     
     let csv = "EXPORT DONNÉES TOOLBOX TALK - EUROHINCA MAROC\n\n";
     csv += "SESSIONS\n";
-    csv += "ID,Date,Équipe,Superviseur,Nombre de participants,Travailleurs\n";
+    csv += "ID,Date,Équipe,Superviseur,Thème,Nombre de participants,Travailleurs\n";
     toolboxSessions.forEach(session => {
-      csv += `${session.id},${session.date},${session.shift},${session.supervisor},${session.attendance},"${session.workers.join('; ')}"\n`;
+      csv += `${session.id},${session.date},${session.shift},${session.supervisor},"${session.theme || 'N/A'}",${session.attendance},"${session.workers.join('; ')}"\n`;
     });
     
     csv += "\n\nSTATISTIQUES TRAVAILLEURS\n";
@@ -588,6 +596,9 @@ const ToolboxTracker = () => {
                       }, session.shift)
                     ),
                     React.createElement('td', {className: "px-4 py-3 border"}, session.supervisor),
+                    React.createElement('td', {className: "px-4 py-3 border"},
+                      React.createElement('span', {className: "font-medium text-blue-700"}, session.theme || '-')
+                    ),
                     React.createElement('td', {className: "px-4 py-3 border text-center"},
                       React.createElement('span', {className: "bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold"},
                         session.attendance
@@ -612,7 +623,7 @@ const ToolboxTracker = () => {
                 ),
                 filteredSessions.length === 0 && React.createElement('tr', null,
                   React.createElement('td', {
-                    colSpan: 7,
+                    colSpan: 8,
                     className: "px-4 py-8 text-center text-gray-500"
                   }, "Aucune session enregistrée")
                 )
