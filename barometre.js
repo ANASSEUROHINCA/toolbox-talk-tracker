@@ -3,11 +3,9 @@ const { useState, useEffect } = React;
 const BarometreSecurite = () => {
   const SUPERVISORS = [
     { name: "Amine Ammar", password: "amine2025" },
-    { name: "Aziz Bourkia", password: "aziz2025" },
-    { name: "Fouad Hedadi", password: "fouad2025" },
     { name: "Anass Kraifa", password: "anass2025" },
-    { name: "Rachid Kasso", password: "rachid2025" },
-    { name: "Adaoud Mehdi", password: "mehdi2025" },
+    { name: "Halima", password: "halima2025" },
+    { name: "Karim Abahmane", password: "karim2025" },
     { name: "Adame Nibba", password: "adame2025" }
   ];
   
@@ -15,7 +13,7 @@ const BarometreSecurite = () => {
     "MOHAMED YAHYAOUI", "JULIO JIMENO", "ANGELO GIOVANNI FERRANTE GIARDINA", "ABEL LOPEZ SUAREZ",
     "ADIL BARDOUD", "IDRISS KHALIL BENSAR", "SEMENSO", "MOUHCINE EL HAJOUI", "AYMANE BENNANI",
     "AMAZOUZ BADER", "CHRIFI MOHAMED", "AMINE AMAR", "AZIZ BOURKIA", "FOUAD HEDADI",
-    "ANASS KRAIFA", "RACHID KASSO", "ADAOUD MEHDI", "SOUFIANE TAHIRI", "AZIZE ECH CHARYF",
+    "ANAS KRAYFA", "RACHID KASSO", "ADAOUD MEHDI", "SOUFIANE TAHIRI", "AZIZE ECH CHARYF",
     "IMAD OUATTAB", "MICHEL", "NICO STUFO", "GRANDA OVIDIO", "ABDERRAZAK HADIKI",
     "RACHID GHAFOUR", "AHMED EL-ASRI", "ABDELFATTAH OUATTAB", "ABDELALI MOUNADAM",
     "PEDRO HERDIA", "ALAIEN", "KARIM BARDOUD", "MOHAMED BARGHACH", "LEONARDO ADASME",
