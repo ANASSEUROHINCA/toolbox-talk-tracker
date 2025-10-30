@@ -6,7 +6,11 @@ const ToolboxTracker = () => {
     { name: "Anass Kraifa", password: "anass2025" },
     { name: "Halima", password: "halima2025" },
     { name: "Karim Abahmane", password: "karim2025" },
-    { name: "Adame Nibba", password: "adame2025" }
+    { name: "Adame Nibba", password: "adame2025" },
+    { name: "Fouad", password: "fouad25" },
+    { name: "Rachid", password: "rachid25" },
+    { name: "Mehdi", password: "mehdi25" },
+    { name: "Ayoub", password: "ayoub25" }
   ];
 
   const EXTRA_ANIMATORS = ["Ayoub", "Fouad", "Rachid", "Mehdi"];
@@ -346,8 +350,8 @@ const ToolboxTracker = () => {
           </div>
 
           <div className="mt-6 text-sm text-gray-600 text-center">
-            <p>Mots de passe par défaut: [prénom]2025</p>
-            <p className="text-xs mt-2">Ex: amine2025, anass2025, halima2025</p>
+            <p>Made by Anass kraifa</p>
+            <p className="text-xs mt-2">Eurohinca Safety Team</p>
           </div>
         </div>
       </div>
