@@ -359,8 +359,8 @@ const ToolboxTracker = () => {
         ),
 
         React.createElement('div', {className: "mt-6 text-sm text-gray-600 text-center"},
-          React.createElement('p', null, "Mots de passe par défaut: [prénom]2025"),
-          React.createElement('p', {className: "text-xs mt-2"}, "Ex: amine2025, fouad2025, anas2025")
+          React.createElement('p', null, "  Made by Anass kraifa"),
+          React.createElement('p', {className: "text-xs mt-2"}, "Eurohinca safety team")
         )
       )
     );
