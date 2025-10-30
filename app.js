@@ -359,8 +359,8 @@ const ToolboxTracker = () => {
         ),
 
         React.createElement('div', {className: "mt-6 text-sm text-gray-600 text-center"},
-          React.createElement('p', null, "  Made by Anass kraifa"),
-          React.createElement('p', {className: "text-xs mt-2"}, "Eurohinca safety team")
+          React.createElement('p', null, "Made by Anass kraifa"),
+          React.createElement('p', {className: "text-xs mt-2"}, "Eurohinca Safety Team")
         )
       )
     );
@@ -604,7 +604,20 @@ const ToolboxTracker = () => {
                         session.attendance
                       )
                     ),
-                    React.createElement('td', {className: "px-4 py-3 border text-sm"}, session.workers.join(', ')),
+                    React.createElement('td', {className: "px-4 py-3 border text-sm"},
+                      session.workers.length <= 3 
+                        ? session.workers.join(', ')
+                        : React.createElement('div', null,
+                            React.createElement('span', null, session.workers.slice(0, 3).join(', ')),
+                            React.createElement('button', {
+                              onClick: (e) => {
+                                e.stopPropagation();
+                                alert(`Liste complète (${session.attendance} travailleurs):\n\n${session.workers.join('\n')}`);
+                              },
+                              className: "ml-2 text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
+                            }, `... +${session.workers.length - 3}`)
+                          )
+                    ),
                     React.createElement('td', {className: "px-4 py-3 border no-print"},
                       React.createElement('div', {className: "flex gap-2 justify-center"},
                         React.createElement('button', {
