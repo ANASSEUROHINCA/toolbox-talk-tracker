@@ -28,12 +28,8 @@
         }
         
         @media print {
-            .no-print { 
-                display: none !important; 
-            }
-            body { 
-                background: white !important; 
-            }
+            .no-print { display: none !important; }
+            body { background: white !important; }
         }
         
         .loading-spinner {
@@ -49,15 +45,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -66,13 +53,14 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyCbBtxboXH1r7Hbxy1LROxx5_qJNZWGgvE",
+            authDomain: "eurohinca-toolbox.firebaseapp.com",
+            databaseURL: "https://eurohinca-toolbox-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "eurohinca-toolbox",
+            storageBucket: "eurohinca-toolbox.firebasestorage.app",
+            messagingSenderId: "201542727953",
+            appId: "1:201542727953:web:c545b6c1b7b8ffcb8eb4b0",
+            measurementId: "G-80QC8VSPKS"
         };
         
         // Initialize Firebase
@@ -87,13 +75,11 @@
                         const snapshot = await database.ref(key).once('value');
                         const value = snapshot.val();
                         if (value) {
-                            console.log(`✅ Loaded ${key}:`, value);
                             return { key, value: JSON.stringify(value), shared };
                         }
-                        console.log(`ℹ️ No data found for ${key}`);
                         return null;
                     } catch (error) {
-                        console.error('❌ Storage get error:', error);
+                        console.error('Storage get error:', error);
                         return null;
                     }
                 },
@@ -102,38 +88,22 @@
                     try {
                         const data = JSON.parse(value);
                         await database.ref(key).set(data);
-                        console.log(`✅ Saved ${key}:`, data);
                         return { key, value, shared };
                     } catch (error) {
-                        console.error('❌ Storage set error:', error);
-                        return null;
-                    }
-                },
-                
-                async delete(key, shared = false) {
-                    try {
-                        await database.ref(key).remove();
-                        console.log(`✅ Deleted ${key}`);
-                        return { key, deleted: true, shared };
-                    } catch (error) {
-                        console.error('❌ Storage delete error:', error);
+                        console.error('Storage set error:', error);
                         return null;
                     }
                 }
             };
             
         } catch (error) {
-            console.error('❌ Firebase initialization error:', error);
-            alert('Erreur de connexion à la base de données. Veuillez vérifier votre connexion Internet.');
+            console.error('Firebase initialization error:', error);
+            alert('Erreur de connexion à la base de données.');
         }
     </script>
     
     <!-- Import Components -->
     <script type="text/babel" src="components/LoginPage.js"></script>
-    <script type="text/babel" src="components/Dashboard.js"></script>
-    <script type="text/babel" src="components/SessionForm.js"></script>
-    <script type="text/babel" src="components/SessionTable.js"></script>
-    <script type="text/babel" src="components/WorkerStats.js"></script>
     
     <!-- Main App -->
     <script type="text/babel" src="app.js"></script>
