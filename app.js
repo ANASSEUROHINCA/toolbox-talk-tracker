@@ -44,12 +44,10 @@ function App() {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
                 >
-                    {/* Dashboard will go here */}
                     <div className="p-8">
                         <h1 className="text-2xl font-bold">
                             Welcome, {currentUser}!
                         </h1>
-                        {/* More dashboard content will be added */}
                     </div>
                 </motion.div>
             )}
