@@ -10,7 +10,7 @@ function LoginPage({ supervisors, onLogin, error }) {
             animate={{ opacity: 1 }}
             className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950 p-6"
             style={{
-                backgroundImage: `url('https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&q=80')`,
+                backgroundImage: `url('https://eurohinca.com/wp-content/uploads/2024/02/slide4.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundBlendMode: 'overlay'
