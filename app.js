@@ -6,7 +6,12 @@ const ToolboxTracker = () => {
     { name: "Anass Kraifa", password: "anass2025" },
     { name: "Halima", password: "halima2025" },
     { name: "Karim Abahmane", password: "karim2025" },
-    { name: "Adame Nibba", password: "adame2025" }
+    { name: "Adame Nibba", password: "adame2025" },
+    { name: "Fouad Haddadi", password: "f2025" },
+    { name: "Rachid Kassou", password: "r2025" },
+    { name: "Mehdi", password: "m2025" },
+    { name: "Ayoub", password: "a2025" },
+    { name: "Oussama", password: "a2025" }
   ];
 
   const EXTRA_ANIMATORS = ["Ayoub", "Fouad", "Rachid", "Mehdi"];
